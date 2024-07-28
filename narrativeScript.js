@@ -693,7 +693,7 @@ const switchScene = (scene, data, geoData, populationData, incomeData) => {
 
 
 Promise.all([
-  d3.csv("Chicago_Crimes_2019_to_2023_UPDATED.csv"),
+  d3.csv("https://media.githubusercontent.com/media/TigerGahalaut/TigerGahalaut.github.io/main/Chicago_Crimes_2019_to_2023_UPDATED.csv"),
   d3.json("Boundaries - Community Areas (current).geojson"),
   d3.csv("Chicago Population 2020.csv"),
   d3.csv("Rounded_Median_Household_Income_DataFrame.csv")
