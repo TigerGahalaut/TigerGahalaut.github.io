@@ -704,18 +704,25 @@ Promise.all([
   console.log("Population Data:", populationData);  // Debugging log
   console.log("Income Data:", incomeData);  // Debugging log
 
-  // Standardize the community area identifiers in the crime data
-  crimeData.forEach(d => {
-    d["Community Area"] = d["Community Area"].toString();
-    if (d["Primary Type"] === "CRIM SEXUAL ASSAULT" || d["Primary Type"] === "CRIMINAL SEXUAL ASSAULT") {
+// Standardize the community area identifiers in the crime data
+crimeData.forEach(d => {
+  if (d["Community Area"] !== undefined) {
+      d["Community Area"] = d["Community Area"].toString();
+  }
+  
+  if (d["Primary Type"] === "CRIM SEXUAL ASSAULT" || d["Primary Type"] === "CRIMINAL SEXUAL ASSAULT") {
       d["Primary Type"] = "SEXUAL ASSAULT";
-    }
-    d["Primary Type"] = d["Primary Type"].trim();  // Ensure no extra spaces
-  });
+  }
+  
+  if (d["Primary Type"] !== undefined) {
+      d["Primary Type"] = d["Primary Type"].trim(); // Ensure no extra spaces
+  }
+});
 
-  // Log unique crime types to debug the issue with "ARSON"
-  const uniqueCrimeTypes = Array.from(new Set(crimeData.map(d => d["Primary Type"])));
-  console.log("Unique Crime Types:", uniqueCrimeTypes);
+// Log unique crime types to debug the issue with "ARSON"
+const uniqueCrimeTypes = Array.from(new Set(crimeData.map(d => d["Primary Type"])));
+console.log("Unique Crime Types:", uniqueCrimeTypes);
+
 
   // Sort crime types and log them
   const crimeTypes = uniqueCrimeTypes.sort();
