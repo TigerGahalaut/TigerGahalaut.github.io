@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chicago Crime Visualization</title>
+  <style>
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+      pointer-events: none;
+    }
+    #chart, #map, #barChart, #scatterplot {
+      width: 960px;
+      margin: 20px auto;
+      text-align: center;
+    }
+    #filter-container {
+      width: 960px;
+      margin: 20px auto;
+      text-align: center;
+    }
+    #lineCrimeType, #scatterCrimeType, #scatterYearFilter, #heatmapYearFilter, #barYearFilter, #heatmapCrimeType, #incomeFilter {
+      width: 200px;
+      font-size: 16px;
+    }
+    #button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="filter-container">
+    <label id="filter-label" for="filter">Select Filter:</label>
+    <select id="lineCrimeType" style="display: none;">
+      <option value="all">All Crimes</option>
+    </select>
+    <select id="scatterCrimeType" style="display: none;">
+      <option value="all">All Crimes</option>
+    </select>
+    <select id="scatterYearFilter" style="display: none;">
+      <option value="all">All Years</option>
+    </select>
+    <select id="heatmapYearFilter" style="display: none;">
+      <option value="all">All Years</option>
+    </select>
+    <select id="barYearFilter" style="display: none;">
+      <option value="all">All Years</option>
+    </select>
+    <select id="heatmapCrimeType" style="display: none;">
+      <option value="all">All Crimes</option>
+    </select>
+    <select id="incomeFilter" style="display: none;">
+      <option value="all">All Income Levels</option>
+      <option value="low">Low Income (less than $40k)</option>
+      <option value="medium">Medium Income ($40k to $90k)</option>
+      <option value="high">High Income (greater than $90k)</option>
+    </select>
+  </div>
+  <div id="chart"></div>
+  <div id="map" style="display: none;"></div>
+  <div id="barChart" style="display: none;"></div>
+  <div id="scatterplot" style="display: none;"></div>
+  <div class="tooltip" style="display: none;"></div>
+  <div id="button-container">
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    <button id="toggleView" style="display: none;">Switch to Month</button>
+  </div>
+
+  <!-- Include D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+  <!-- Include your custom script -->
+  <script src="narrativeScript.js"></script>
+</body>
+</html>
