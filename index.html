@@ -30,9 +30,17 @@
       text-align: center;
       margin-top: 20px;
     }
+
+    .content {
+      margin: 0 auto;
+      padding: 10px;
+      max-width: 900px;
+      text-align: justify;
+    }
   </style>
 </head>
 <body>
+  <div id="loading-message" style="text-align: center; font-size: 50px;">Loading dataset...</div>
   <div id="filter-container">
     <label id="filter-label" for="filter"></label>
     <select id="lineCrimeType" style="display: none;">
@@ -60,10 +68,44 @@
       <option value="high">High Income (greater than $90k)</option>
     </select>
   </div>
+  <div id="line-text" style="display: none; text-align: left; margin: 20px;">
+    <p class = "content">The COVID-19 pandemic was an event that reverberated through every facet of society, and the city of
+      Chicago was no exception. The changes brought about by COVID influenced every aspect of urban life, especially
+      crime. We can see from the trend line below that the lockdowns that occurred in 2020 and 2021 caused the crime rate
+      to significantly decrease. This was to be expected. However, the circumstances of COVID has also led to unexpected surges in
+      other types of criminal activity. For example, violent crimes like homicide and arson saw a marked increase. The economic 
+      hardship brought about by the pandemic led to increased stress and desperation among many individuals, which in turn fueled
+      violent behavior. Job losses, financial instability, and the strain of prolonged isolation created a volatile environment. Explore 
+      the line graph to observe how the rates of these and other crimes rates have changed throughout the pandemic. You can switch 
+      between yearly and monthly trends using the toggle button.</p>
+  </div>
   <div id="chart"></div>
-  <div id="map" style="display: none;"></div>
-  <div id="barChart" style="display: none;"></div>
+  <div id="scatter-text" style="display: none; text-align: center; margin: 20px;">
+    <p class = "content"> This scatterplot visualizes the relationship between crime rates and median household income across different community areas
+       in Chicago. Notice a general negative correlation between income and crime rate, indicating that more affluent communities
+       tend to experience lower crime.  The impact of COVID-19 on these trends is significant, as the pandemic exacerbated socioeconomic disparities. 
+       Lower-income communities, which already faced higher crime rates, experienced further strain due to economic hardships, job losses, and limited
+       access to resources during the lockdown periods. Meanwhile, more affluent communities were better equipped to manage the challenges brought by the 
+       pandemic, resulting in less dramatic changes in crime rates. Click on the dropdown menus explore these trends and gain a better ideas of how 
+       socioeconomic factors and the pandemic influenced crime rates in Chicago's various communities. </p>
+  </div>
   <div id="scatterplot" style="display: none;"></div>
+  <div id="heatmap-text" style="display: none; text-align: center; margin: 20px;">
+    <p class = "content"> We can clearly see that virtually every community of Chicago experienced a drop in crime during COVID, followed by an increase in crime as the pandemic
+      subsided. We can also see the stark disparities in crime rates across different parts of the city. The South Side of Chicago, represented by darker shades,
+      consistently experiences higher crime rates compared to other areas. In contrast, the North Side, which includes many of the city's more affluent neighborhoods, 
+      exhibits lower crime rates. This pattern underscores the significant impact of socioeconomic factors on crime. During the pandemic, these disparities became even 
+      more pronounced as lower-income communities, primarily in the South, faced greater economic hardship and limited access to resources. Explore the heat map to gain
+      a comprehensive understanding of how different communities reacted to the pandemic compared to each other and the geographical patterns that shaped these trends. </p>
+  </div>
+  <div id="map" style="display: none;"></div>
+  <div id="bar-text" style="display: none; text-align: center; margin: 20px;">
+    <p class = "content"> During the pandemic, with the implementation of lockdowns and social distancing measures, there was a noticeable shift in the locations where crimes occurred
+      Public spaces, which traditionally saw high crime rates, experienced a decline as fewer people were out and about. Conversely, residential areas saw an increase in 
+      crime rates, as more people were confined to their homes. This shift in crime locations underscores how the pandemic altered daily routines and social behaviors, 
+      thereby influencing where and how crimes were committed. Use the dropdown menu to see how the location of crime has been affected throughout the pandemic. </p>
+  </div>
+  <div id="barChart" style="display: none;"></div>
   <div class="tooltip" style="display: none;"></div>
   <div id="button-container">
     <button id="prev">Previous</button>

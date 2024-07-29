@@ -1,6 +1,6 @@
-const margin = { top: 20, right: 30, bottom: 50, left: 30 };
-const width = 960 - margin.left - margin.right;
-const height = 500 - margin.top - margin.bottom;
+const margin = { top: 120, right: 80, bottom: 50, left: 60 };
+const width = 1200 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 // Append title container
 d3.select("body").insert("h1", "#filter-container").attr("id", "scene-title").style("text-align", "center");
@@ -10,13 +10,17 @@ const updateTitle = (scene) => {
   const title = d3.select("#scene-title");
   if (scene === "intro") {
     title.text("Chicago Crime Visualization from 2019 to 2023");
-  } else if (scene === "line") {
+  } 
+  if (scene === "line") {
     title.text("Crime Trends Over Time");
-  } else if (scene === "scatterplot") {
+  } 
+  if (scene === "scatterplot") {
     title.text("Crime Rate vs Income by Community");
-  } else if (scene === "heatmap") {
+  } 
+  if (scene === "heatmap") {
     title.text("Crime Heatmap by Community Area");
-  } else if (scene === "bar") {
+  } 
+  if (scene === "bar") {
     title.text("Crime Counts by Type");
   }
 };
@@ -62,16 +66,6 @@ const hideElement = (selector) => d3.select(selector).style("display", "none");
 // Function to set an element's display to inline
 const inlineElement = (selector) => d3.select(selector).style("display", "inline");
 
-// Function to adjust annotation position to keep it within the chart boundaries
-function adjustAnnotationPosition(xPos, yPos, width, height) {
-  const padding = 10; // Padding from the edges
-  if (xPos < padding) xPos = padding;
-  if (xPos > width - padding) xPos = width - padding;
-  if (yPos < padding) yPos = padding;
-  if (yPos > height - padding) yPos = height - padding;
-  return { xPos, yPos };
-}
-
 // Function to update the line chart
 const updateLineChart = (data, populationData, crimeType) => {
   console.log("Updating line chart");
@@ -104,7 +98,7 @@ const updateLineChart = (data, populationData, crimeType) => {
     const date = new Date(d["Date"]);
     return viewByYear ? date.getFullYear() : `${date.getFullYear()}-${date.getMonth() + 1}`;
   }).map(([time, crimeRate]) => ({
-    time: viewByYear ? new Date(time, 0, 1) : new Date(time),
+    time: viewByYear ? new Date(time, 0, 1) : new Date(time.split("-")[0], time.split("-")[1] - 1, 1),
     crimeRate
   })).sort((a, b) => a.time - b.time);
 
@@ -128,12 +122,12 @@ const updateLineChart = (data, populationData, crimeType) => {
 
   lineSvg.append("g")
     .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(d3.timeYear).tickFormat(d3.timeFormat("%Y"))) // Always display years on the x-axis
+    .call(d3.axisBottom(x).ticks(d3.timeYear).tickFormat(d3.timeFormat("%Y"))) // Display years on the x-axis
     .append("text")
       .attr("x", width / 2)
       .attr("y", 40)
       .attr("fill", "#000")
-      .text(viewByYear ? "Year" : "Month");
+      .text("Year");
 
   lineSvg.append("g")
     .call(d3.axisLeft(y))
@@ -188,68 +182,403 @@ const updateLineChart = (data, populationData, crimeType) => {
 
   // Calculate the y position of the annotation based on the data
   const lockdownData = aggregateData.find(d => d.time.getFullYear() === 2020);
-  const lockdownY2020 = y(lockdownData.crimeRate);
+  const lockdownY2020 = lockdownData ? y(lockdownData.crimeRate) : 0;
   const lockdownEndData = aggregateData.find(d => d.time.getFullYear() === 2022);
-  const lockdownY2022 = y(lockdownEndData.crimeRate);
+  const lockdownY2022 = lockdownEndData ? y(lockdownEndData.crimeRate) : 0;
 
   console.log("Lockdown Y 2020:", lockdownY2020, "Lockdown Y 2022:", lockdownY2022);  // Debugging log
 
   // Define the annotations
-  let annotations = [
-    {
-      note: {
-        label: "Covid 19 blah blah blah",
-        title: "Start of Covid-19 Pandemic:"
-      },
-      x: x(new Date(2020, 0, 1)),
-      y: lockdownY2020,
-      dy: -50,
-      dx: 50,
-      color: ["black"],
-      subject: {
-        radius: 5,
-        radiusPadding: 5
-      },
-      connector: {
-        end: "arrow",
-        type: "line",
-        lineWidth: 2
-      }
-    },
-    {
-      note: {
-        label: "Covid 19 blah blah blah.",
-        title: "2022 End of Quarantine:"
-      },
-      x: x(new Date(2022, 0, 1)),
-      y: lockdownY2022,
-      dy: -50,
-      dx: 0,
-      color: ["black"],
-      subject: {
-        radius: 5,
-        radiusPadding: 5
-      },
-      connector: {
-        end: "arrow",
-        type: "line",
-        lineWidth: 2
-      }
-    }
-  ];
+  let annotations = [];  // create an empty list
 
-  // Adjust positions to keep annotations within bounds
-  annotations = annotations.map(annotation => {
-    const { xPos, yPos } = adjustAnnotationPosition(
-      annotation.x + annotation.dx,
-      annotation.y + annotation.dy,
-      width,
-      height
-    );
-    annotation.dx = xPos - annotation.x;
-    annotation.dy = yPos - annotation.y;
-    return annotation;
-  });
+  if (viewByYear) {
+    if (crimeType === "all") {
+      annotations = [
+        {
+          note: {
+            label: "Total crime rates dropped significantly during the lockdown period.",
+            title: "2020 Quarantine Lockdown:"
+          },
+          x: x(new Date(2020, 0, 0)),
+          y: lockdownY2020,
+          dy: -100,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "Total crime rates increased significantly after restrictions were lifted.",
+            title: "2022 End of Quarantine:"
+          },
+          x: x(new Date(2022, 0, 0)),
+          y: lockdownY2022,
+          dy: -100,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        }
+      ];
+    } else {
+      annotations = [
+        {
+          note: {
+            label: "",
+            title: "2020: Quarantine Begins"
+          },
+          x: x(new Date(2020, 0, 0)),
+          y: lockdownY2020,
+          dy: -80,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "",
+            title: "2022: End of Quarantine"
+          },
+          x: x(new Date(2022, 0, 0)),
+          y: lockdownY2022,
+          dy: -100,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        }
+      ];
+    }
+  } else {
+    if (crimeType === "all") {
+      annotations = [
+        {
+          note: {
+            label: "First confirmed COVID-19 case in Illinois",
+            title: ""
+          },
+          x: x(new Date(2020, 0, 0)),
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2020 && d.time.getMonth() === 0).crimeRate),
+          dy: 100,
+          dx: -70,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "Illinois issues a statewide Quarantine order",
+            title: ""
+          },
+          x: x(new Date(2020, 2, 0)),
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2020 && d.time.getMonth() === 2).crimeRate),
+          dy: -300,
+          dx: -40,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }        
+        },
+        {
+          note: {
+            label: "Chicago begins a phased reopening. Crime rates begin to rise again.",
+            title: ""
+          },
+          x: x(new Date(2020, 5, 0)),
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2020 && d.time.getMonth() === 5).crimeRate),
+          dy: -100,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        },
+        // Additional annotations for month view
+        {
+          note: {
+            label: "Chicago imposes new restrictions. COVID-19 cases surge",
+            title: ""
+          },
+          x: x(new Date(2020, 8, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2020 && d.time.getMonth() === 8).crimeRate),
+          dy: 50,
+          dx: -10,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "COVID-19 vaccinations begin in Chicago",
+            title: ""
+          },
+          x: x(new Date(2021, 0, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2021 && d.time.getMonth() === 0).crimeRate),
+          dy: -100,
+          dx: 20,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "Illinois lifts most COVID-19 restrictions as vaccination rates increase.",
+            title: ""
+          },
+          x: x(new Date(2021, 4, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2021 && d.time.getMonth() === 4).crimeRate),
+          dy: -230,
+          dx: 60,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "Omicron variant leads to reinstated quarantine",
+            title: ""
+          },
+          x: x(new Date(2021, 11, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2021 && d.time.getMonth() === 11).crimeRate),
+          dy: -100,
+          dx: 40,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }        
+        },
+        {
+          note: {
+            label: "Chicago lifts remaining COVID-19 restrictions",
+            title: ""
+          },
+          x: x(new Date(2022, 2, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2022 && d.time.getMonth() === 2).crimeRate),
+          dy: 90,
+          dx: 40,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }        
+        },
+        {
+          note: {
+            label: "City officials launch a spring vaccination campaign to encourage booster shots",
+            title: ""
+          },
+          x: x(new Date(2023, 3, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2023 && d.time.getMonth() === 3).crimeRate),
+          dy: 80,
+          dx: 110,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "Emergence of more contagious subvariants of Omicron, specifically the BQ.1 and BQ.1.1",
+            title: ""
+          },
+          x: x(new Date(2022, 9, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2022 && d.time.getMonth() === 9).crimeRate),
+          dy: -50,
+          dx: -50,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }        
+        },
+        {
+          note: {
+            label: "Post-Christmas surge in COVID-19 cases",
+            title: ""
+          },
+          x: x(new Date(2023, 0, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2023 && d.time.getMonth() === 0).crimeRate),
+          dy: 120,
+          dx: -10,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }        
+        },
+        {
+          note: {
+            label: "Chicago reports steady COVID-19 case numbers and high vaccination rates.",
+            title: ""
+          },
+          x: x(new Date(2023, 4, 0)), // Example date
+          y: y(aggregateData.find(d => d.time.getFullYear() === 2023 && d.time.getMonth() === 4).crimeRate),
+          dy: -80,
+          dx: -10,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineWidth: 2
+          }        
+        }
+      ];
+
+    } else {
+      annotations = [
+        {
+          note: {
+            label: "",
+            title: "2020: Quarantine Begins"
+          },
+          x: x(new Date(2020, 0, 0)),
+          y: lockdownY2020,
+          dy: -200,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        },
+        {
+          note: {
+            label: "",
+            title: "2022: End of Quarantine"
+          },
+          x: x(new Date(2022, 0, 0)),
+          y: lockdownY2022,
+          dy: -200,
+          dx: 0,
+          color: ["black"],
+          subject: {
+            radius: 5,
+            radiusPadding: 5
+          },
+          connector: {
+            end: "arrow",
+            type: "line",
+            lineType: "vertical",
+            lineWidth: 2
+          }
+        }
+      ];
+    }
+  }
 
   const makeAnnotations = d3.annotation()
     .annotations(annotations)
@@ -262,10 +591,8 @@ const updateLineChart = (data, populationData, crimeType) => {
 
   console.log("lockdownY2020: ", lockdownY2020);
   console.log("lockdownY2022: ", lockdownY2022);
+
 };
-
-
-
 
 // Function to update the scatter plot
 const updateScatterPlot = (crimeData, incomeData, populationData, crimeType, year) => {
@@ -393,7 +720,47 @@ const updateScatterPlot = (crimeData, incomeData, populationData, crimeType, yea
         .duration(200)
         .attr("r", 0)
         .remove();
-  };
+
+  // Add dashed lines for income thresholds
+  const incomeThresholds = [40000, 90000];
+  incomeThresholds.forEach(threshold => {
+    scatterSvg.append("line")
+      .attr("x1", x(threshold))
+      .attr("x2", x(threshold))
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr("stroke", "black")
+      .attr("stroke-dasharray", "4 4")
+      .attr("stroke-width", 1.5);
+  });
+
+  // Add legend
+  const legend = scatterSvg.append("g")
+    .attr("transform", `translate(${width - 150}, ${20})`);
+
+  const legendData = [
+    { color: "red", label: "Less than $40k" },
+    { color: "blue", label: "$40k to $90k" },
+    { color: "green", label: "Greater than $90k" },
+  ];
+
+  legend.selectAll("rect")
+    .data(legendData)
+    .enter().append("rect")
+      .attr("x", 0)
+      .attr("y", (d, i) => i * 20)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", d => d.color);
+
+  legend.selectAll("text")
+    .data(legendData)
+    .enter().append("text")
+      .attr("x", 24)
+      .attr("y", (d, i) => i * 20 + 9)
+      .attr("dy", ".35em")
+      .text(d => d.label);
+};
 
 // Function to update the heatmap
 const updateHeatmap = (crimeData, geoData, populationData, incomeData, year, crimeType, incomeLevel) => {
@@ -494,14 +861,7 @@ const updateHeatmap = (crimeData, geoData, populationData, incomeData, year, cri
       });
 };
 
-  
 // Define the location categories
-// const locationCategories = {
-//   "residential": ["APARTMENT", "RESIDENCE", "RESIDENCE-GARAGE", "RESIDENTIAL YARD (FRONT/BACK)", "RESIDENTIAL PORCH", "DRIVEWAY - RESIDENTIAL"],
-//   "business": ["RESTAURANT", "BAR OR TAVERN", "DEPARTMENT STORE", "GAS STATION", "GROCERY FOOD STORE", "BANK"],
-//   "public": ["STREET", "SIDEWALK", "PARKING LOT/GARAGE(NON.RESID.)", "PARK PROPERTY", "ALLEY", "HIGHWAY/EXPRESSWAY", "CTA TRAIN"],
-// };
-
 const locationCategories = {
   "Residential": [
       "RESIDENCE",
@@ -539,7 +899,6 @@ const locationCategories = {
       "CTA TRAIN"
   ]
 };
-
 
 // Function to map a location description to a category
 const getLocationCategory = (location) => {
@@ -586,7 +945,12 @@ const updateBarChart = (data, year) => {
     .attr("x", 0)
     .attr("y", d => y(d.type))
     .attr("height", y.bandwidth())
-    .attr("fill", "steelblue")
+    .attr("fill", d => {
+      if (d.type === "Residential") return "#ff1493";
+      if (d.type === "Business") return "steelblue";
+      if (d.type === "Public") return "orange";
+      return "gray"; // Default color for other categories
+    })
     .attr("width", d => x(d.count)) // Set initial width to the current value
     .on("mouseover", (event, d) => {
       tooltip.style("display", "block")
@@ -607,7 +971,13 @@ const updateBarChart = (data, year) => {
   bars.transition()
     .duration(1000)
     .attr("width", d => x(d.count))
-    .attr("y", d => y(d.type));
+    .attr("y", d => y(d.type))
+    .attr("fill", d => {
+      if (d.type === "Residential") return "#ff1493"; 
+      if (d.type === "Business") return "steelblue"; 
+      if (d.type === "Public") return "orange"; 
+      return "gray"; // Default color for other categories
+    });
 
   // Add mouseover event listeners to existing bars
   bars.on("mouseover", (event, d) => {
@@ -641,7 +1011,6 @@ const updateBarChart = (data, year) => {
     .call(d3.axisBottom(x).ticks(5));
 };
 
-  
 // Function to switch scenes
 const switchScene = (scene, data, geoData, populationData, incomeData) => {
   console.log(`Switching to ${scene} scene`);
@@ -661,23 +1030,44 @@ const switchScene = (scene, data, geoData, populationData, incomeData) => {
   hideElement("#incomeFilter");
   hideElement("#filter-label");
   hideElement("#toggleView");
+  hideElement("#line-text");
+  hideElement("#scatter-text");
+  hideElement("#heatmap-text");
+  hideElement("#bar-text");
+
+  // Show or hide the previous button based on the current scene
+  if (scene === "intro") {
+    prevButton.style("display", "none");
+  } else {
+    prevButton.style("display", "inline-block");
+  }
+
+  // Show or hide the next button based on the current scene
+  if (scene === "bar") {
+    nextButton.style("display", "none");
+  } else {
+    nextButton.style("display", "inline-block");
+  }
 
   if (scene === "intro") {
     // No specific elements to show for intro
   } else if (scene === "line") {
     showElement("#chart");
+    showElement("#line-text");
     inlineElement("#lineCrimeType");
-    inlineElement("#filter-label").text("Select Crime Type for Line Graph:");
-    inlineElement("#toggleView").text(viewByYear ? "Switch to Month View" : "Switch to Year View");
-    updateLineChart(data, populationData, d3.select("#lineCrimeType").node().value);  // Pass populationData here
+    inlineElement("#filter-label").text("Select Crime Type:");
+    inlineElement("#toggleView").text(viewByYear ? "Switch to Monthly View" : "Switch to Yearly View");
+    updateLineChart(data, populationData, d3.select("#lineCrimeType").node().value);
   } else if (scene === "scatterplot") {
     showElement("#scatterplot");
+    showElement("#scatter-text");
     inlineElement("#scatterCrimeType");
     inlineElement("#scatterYearFilter");
-    inlineElement("#filter-label").text("Select Crime Type for Scatterplot:");
+    inlineElement("#filter-label").text("Select Crime Type:");
     updateScatterPlot(data, incomeData, populationData, d3.select("#scatterCrimeType").node().value, d3.select("#scatterYearFilter").node().value);
   } else if (scene === "heatmap") {
     showElement("#map");
+    showElement("#heatmap-text");
     inlineElement("#heatmapYearFilter");
     inlineElement("#heatmapCrimeType");
     inlineElement("#incomeFilter");
@@ -685,12 +1075,20 @@ const switchScene = (scene, data, geoData, populationData, incomeData) => {
     updateHeatmap(data, geoData, populationData, incomeData, d3.select("#heatmapYearFilter").node().value, d3.select("#heatmapCrimeType").node().value, d3.select("#incomeFilter").node().value);
   } else if (scene === "bar") {
     showElement("#barChart");
+    showElement("#bar-text");
     inlineElement("#barYearFilter");
     inlineElement("#filter-label").text("Select Year:");
     updateBarChart(data, d3.select("#barYearFilter").node().value);
   }
 };
 
+// Show loading message
+const loadingMessage = d3.select("#loading-message");
+
+// Hide navigation buttons initially
+const prevButton = d3.select("#prev").style("display", "none");
+const nextButton = d3.select("#next").style("display", "none");
+const toggleViewButton = d3.select("#toggleView").style("display", "none");
 
 Promise.all([
   d3.csv("https://media.githubusercontent.com/media/TigerGahalaut/TigerGahalaut.github.io/main/Chicago_Crimes_2019_to_2023_UPDATED.csv"),
@@ -704,25 +1102,31 @@ Promise.all([
   console.log("Population Data:", populationData);  // Debugging log
   console.log("Income Data:", incomeData);  // Debugging log
 
-// Standardize the community area identifiers in the crime data
-crimeData.forEach(d => {
-  if (d["Community Area"] !== undefined) {
+  // Hide loading message
+  loadingMessage.style("display", "none");
+  // Show navigation buttons after data is loaded
+  prevButton.style("display", "inline-block");
+  nextButton.style("display", "inline-block");
+  toggleViewButton.style("display", "inline-block");
+
+  // Standardize the community area identifiers in the crime data
+  crimeData.forEach(d => {
+    if (d["Community Area"] !== undefined) {
       d["Community Area"] = d["Community Area"].toString();
-  }
-  
-  if (d["Primary Type"] === "CRIM SEXUAL ASSAULT" || d["Primary Type"] === "CRIMINAL SEXUAL ASSAULT") {
+    }
+    
+    if (d["Primary Type"] === "CRIM SEXUAL ASSAULT" || d["Primary Type"] === "CRIMINAL SEXUAL ASSAULT") {
       d["Primary Type"] = "SEXUAL ASSAULT";
-  }
-  
-  if (d["Primary Type"] !== undefined) {
+    }
+    
+    if (d["Primary Type"] !== undefined) {
       d["Primary Type"] = d["Primary Type"].trim(); // Ensure no extra spaces
-  }
-});
+    }
+  });
 
-// Log unique crime types to debug the issue with "ARSON"
-const uniqueCrimeTypes = Array.from(new Set(crimeData.map(d => d["Primary Type"])));
-console.log("Unique Crime Types:", uniqueCrimeTypes);
-
+  // Log unique crime types to debug the issue with "ARSON"
+  const uniqueCrimeTypes = Array.from(new Set(crimeData.map(d => d["Primary Type"])));
+  console.log("Unique Crime Types:", uniqueCrimeTypes);
 
   // Sort crime types and log them
   const crimeTypes = uniqueCrimeTypes.sort();
@@ -852,7 +1256,7 @@ console.log("Unique Crime Types:", uniqueCrimeTypes);
   // Toggle view button to switch between year and month views in line chart
   d3.select("#toggleView").on("click", () => {
     viewByYear = !viewByYear;
-    d3.select("#toggleView").text(viewByYear ? "Switch to Month View" : "Switch to Year View");
+    d3.select("#toggleView").text(viewByYear ? "Switch to Monthly View" : "Switch to Yearly View");
     updateLineChart(crimeData, populationData, lineCrimeTypeSelect.node().value);
   });
 
