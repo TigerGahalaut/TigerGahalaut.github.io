@@ -666,7 +666,7 @@ const updateScatterPlot = (crimeData, incomeData, populationData, crimeType, yea
       .attr("x", width / 2)
       .attr("y", 40)
       .attr("fill", "#000")
-      .text("Median Household Income");
+      .text("Median Household Income ($)");
 
   scatterSvg.append("g")
     .call(d3.axisLeft(y))
