@@ -594,7 +594,6 @@ const updateLineChart = (data, populationData, crimeType) => {
 
 };
 
-// Function to update the scatter plot
 const updateScatterPlot = (crimeData, incomeData, populationData, crimeType, year) => {
   console.log("Updating scatter plot");
 
@@ -760,7 +759,44 @@ const updateScatterPlot = (crimeData, incomeData, populationData, crimeType, yea
       .attr("y", (d, i) => i * 20 + 9)
       .attr("dy", ".35em")
       .text(d => d.label);
+
+  // Add annotation for the Loop
+  const loopData = scatterData.find(d => d.name === "Loop");
+  if (loopData) {
+    const annotations = [
+      {
+        note: {
+          label: "",
+          title: "The Loop"
+        },
+        x: x(loopData.income),
+        y: y(loopData.rate),
+        dy: -50,
+        dx: 30,
+        color: ["black"],
+        subject: {
+          radius: 5,
+          radiusPadding: 5
+        },
+        connector: {
+          end: "arrow",
+          type: "line",
+          lineType: "horizontal",
+          lineWidth: 2
+        }
+      }
+    ];
+
+    const makeAnnotations = d3.annotation()
+      .annotations(annotations)
+      .type(d3.annotationLabel);
+
+    scatterSvg.append("g")
+      .attr("class", "annotation-group")
+      .call(makeAnnotations);
+  }
 };
+
 
 // Function to update the heatmap
 const updateHeatmap = (crimeData, geoData, populationData, incomeData, year, crimeType, incomeLevel) => {
